@@ -1,0 +1,416 @@
+openapi: "3.0.2"
+
+info:
+  title: AccuScraper
+  description: AccuWeather scraping server
+  version: "1.0"
+
+servers:
+  - url: http://localhost:8080/api/v1
+    description: Local dev server (withouth docker)
+  - url: http://localhost/api/v1
+    description: Local dev server (with docker)
+
+paths:
+  /location-search:
+    get:
+      description: Returns all available locations and the corresponding key
+      parameters:
+        - name: language
+          in: query
+          description: Abbreviation of the country, e.g. en, es
+          required: true
+          schema:
+            type: string
+          example: en
+        - name: query
+          in: query
+          description: The location you are looking for
+          required: true
+          schema:
+            type: string
+          example: los
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/location-search"
+        500:
+          $ref: "#/components/responses/error"
+
+  /forecast:
+    get:
+      description: Returns the forecast for current and next day
+      parameters:
+        - name: language
+          in: query
+          description: Abbreviation of the country, e.g. en, es
+          required: true
+          schema:
+            type: string
+          example: en
+        - name: key
+          in: query
+          description: The location key (see /location-search)
+          required: true
+          schema:
+            type: string
+          example: 347625
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/forecast"
+        500:
+          $ref: "#/components/responses/error"
+
+  /forecast/hourly:
+    get:
+      description: Returns the forecast for the next 24 hours
+      parameters:
+        - name: language
+          in: query
+          description: Abbreviation of the country, e.g. en, es
+          required: true
+          schema:
+            type: string
+          example: en
+        - name: key
+          in: query
+          description: The location key (see /location-search)
+          required: true
+          schema:
+            type: string
+          example: 347625
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/forecast-hourly"
+        500:
+          $ref: "#/components/responses/error"
+
+  /forecast/daily:
+    get:
+      description: Returns the forecast for the days
+      parameters:
+        - name: language
+          in: query
+          description: Abbreviation of the country, e.g. en, es
+          required: true
+          schema:
+            type: string
+          example: en
+        - name: key
+          in: query
+          description: The location key (see /location-search)
+          required: true
+          schema:
+            type: string
+          example: 347625
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/forecast-daily"
+        500:
+          $ref: "#/components/responses/error"
+
+  /current-weather:
+    get:
+      description: Returns the current weather
+      parameters:
+        - name: language
+          in: query
+          description: Abbreviation of the country, e.g. en, es
+          required: true
+          schema:
+            type: string
+          example: en
+        - name: key
+          in: query
+          description: The location key (see /location-search)
+          required: true
+          schema:
+            type: string
+          example: 347625
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/current-weather"
+        500:
+          $ref: "#/components/responses/error"
+
+components:
+  responses:
+    error:
+      description: Example error response
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/error"
+
+  schemas:
+    error:
+      type: object
+      required:
+        - error
+      properties:
+        error:
+          description: General information about the error
+          type: string
+
+    location-search:
+      type: array
+      items:
+        type: object
+        required:
+          - country
+          - administrativeArea
+          - localizedName
+          - key
+        properties:
+          country:
+            type: string
+          administrativeArea:
+            type: string
+          localizedName:
+            type: string
+          key:
+            type: string
+
+    forecast:
+      type: object
+      required:
+        - currentWeather
+        - airQuality
+        - course
+      properties:
+        warning:
+          $ref: "#/components/schemas/warning"
+        currentWeather:
+          $ref: "#/components/schemas/currentWeather"
+        airQuality:
+          $ref: "#/components/schemas/airQuality"
+        course:
+          $ref: "#/components/schemas/course"
+
+    warning:
+      type: object
+      required:
+        - title
+        - description
+      properties:
+        count:
+          type: string
+        phrase:
+          type: string
+
+    currentWeather:
+      type: object
+      required:
+        - time
+        - temp
+        - tempFeel
+        - phrase
+        - airQuality
+        - wind
+        - windGusts
+      properties:
+        time:
+          type: string
+        temp:
+          type: string
+        tempFeel:
+          type: string
+        phrase:
+          type: string
+        airQuality:
+          type: string
+        wind:
+          type: string
+        windGusts:
+          type: string
+        icon:
+          type: string
+          description: Base64 encoded image
+
+    airQuality:
+      type: object
+      required:
+        - date
+        - value
+        - unit
+        - phrase
+      properties:
+        date:
+          type: string
+        value:
+          type: string
+        unit:
+          type: string
+        phrase:
+          type: string
+
+    course:
+      type: object
+      required:
+        - today
+        - tonight
+        - tomorrow
+      properties:
+        today:
+          $ref: "#/components/schemas/courseData"
+        tonight:
+          $ref: "#/components/schemas/courseData"
+        tomorrow:
+          $ref: "#/components/schemas/courseData"
+
+    courseData:
+      type: object
+      required:
+        - date
+        - temp
+        - tempFeel
+        - phrase
+      properties:
+        date:
+          type: string
+        temp:
+          type: string
+        tempFeel:
+          type: string
+        phrase:
+          type: string
+        icon:
+          type: string
+          description: Base64 encoded image
+
+    forecast-hourly:
+      type: array
+      items:
+        type: object
+        required:
+          - time
+          - temp
+          - tempFeel
+          - phrase
+          - humidity
+        properties:
+          time:
+            type: string
+          temp:
+            type: string
+          tempFeel:
+            type: string
+          phrase:
+            type: string
+          humidity:
+            type: string
+          icon:
+            type: string
+            description: Base64 encoded image
+
+    forecast-daily:
+      type: array
+      items:
+        type: object
+        required:
+          - day
+          - date
+          - tempHigh
+          - tempLow
+          - phrase
+          - humidity
+          - uvIndex
+          - wind
+        properties:
+          day:
+            type: string
+          date:
+            type: string
+          tempHigh:
+            type: string
+          tempLow:
+            type: string
+          phrase:
+            type: string
+          humidity:
+            type: string
+          uvIndex:
+            type: string
+          wind:
+            type: string
+          warnings:
+            type: array
+            items:
+              type: object
+              required:
+                - description
+                - timeSpan
+              properties:
+                description:
+                  type: string
+                timeSpan:
+                  type: string
+          icon:
+            type: string
+            description: Base64 encoded image
+
+    current-weather:
+      type: object
+      required:
+        - date
+        - time
+        - temp
+        - tempFeel
+        - phrase
+        - wind
+        - windGusts
+        - humidity
+        - dewPoint
+        - airPressure
+        - cloudiness
+        - sightDistance
+        - ceilingClouds
+      properties:
+        date:
+          type: string
+        time:
+          type: string
+        temp:
+          type: string
+        tempFeel:
+          type: string
+        phrase:
+          type: string
+        wind:
+          type: string
+        windGusts:
+          type: string
+        humidity:
+          type: string
+        dewPoint:
+          type: string
+        airPressure:
+          type: string
+        cloudiness:
+          type: string
+        sightDistance:
+          type: string
+        ceilingClouds:
+          type: string
+        icon:
+          type: string
+          description: Base64 encoded image
