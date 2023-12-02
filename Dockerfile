@@ -16,6 +16,9 @@ WORKDIR /
 
 COPY --from=builder /app/accuscraper .
 
+ENV LOG_FORMAT=json \
+	LOG_LEVEL=0
+
 EXPOSE 8080
 
 USER nobody

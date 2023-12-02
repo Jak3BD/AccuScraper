@@ -2,10 +2,10 @@ package forecast
 
 import (
 	"accuscraper/utils"
-	"fmt"
 	"strings"
 
 	"github.com/PuerkitoBio/goquery"
+	"github.com/rs/zerolog/log"
 )
 
 func course(doc *goquery.Document) Course {
@@ -40,7 +40,7 @@ func getCourse(s *goquery.Selection) CourseData {
 
 	icon, err := utils.GetSVG(s.Find("svg"))
 	if err != nil {
-		fmt.Println("Error getting SVG:", err)
+		log.Error().Err(err).Msg("error getting SVG")
 	} else {
 		data.Icon = icon
 	}

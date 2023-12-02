@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/PuerkitoBio/goquery"
+	"github.com/rs/zerolog/log"
 )
 
 func Handle(w http.ResponseWriter, r *http.Request) {
@@ -40,7 +41,12 @@ func Handle(w http.ResponseWriter, r *http.Request) {
 
 		icon, err := utils.GetSVG(s.Find("svg"))
 		if err != nil {
-			fmt.Println("Error getting SVG:", err)
+			log.Error().Err(err).Fields(map[string]interface{}{
+				"country":       resolvedKey.Country,
+				"localizedName": resolvedKey.LocalizedName,
+				"zip":           resolvedKey.ZIP,
+				"key":           key,
+			}).Msg("error getting SVG")
 		} else {
 			data.Icon = icon
 		}

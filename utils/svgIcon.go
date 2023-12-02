@@ -1,8 +1,9 @@
 package utils
 
 import (
-	"encoding/base64"
 	"fmt"
+	"strings"
+	"text/template"
 
 	"github.com/PuerkitoBio/goquery"
 )
@@ -24,5 +25,16 @@ func GetSVG(icon *goquery.Selection) (string, error) {
 
 	svg := fmt.Sprintf(`<svg viewBox="%s" width="%s" height="%s">%s</svg>`, viewBox, width, height, iconHtml)
 
-	return base64.StdEncoding.EncodeToString([]byte(svg)), nil
+	tmpl, err := template.New("sanitize").Parse(svg)
+	if err != nil {
+		return "", err
+	}
+
+	var sanitizedSVG strings.Builder
+	err = tmpl.Execute(&sanitizedSVG, nil)
+	if err != nil {
+		return "", err
+	}
+
+	return sanitizedSVG.String(), nil
 }

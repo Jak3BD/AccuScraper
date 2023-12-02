@@ -1,8 +1,9 @@
 package api
 
 import (
-	"log"
 	"net/http"
+
+	"github.com/rs/zerolog/log"
 )
 
 func CorsMiddleware(next http.Handler) http.Handler {
@@ -20,12 +21,16 @@ func CorsMiddleware(next http.Handler) http.Handler {
 	})
 }
 
+// for additional stuff, e.g. authentication
 func Middleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		log.Debug().Fields(map[string]interface{}{
+			"method": r.Method,
+			"path":   r.URL.Path,
+			"remote": r.RemoteAddr,
+		}).Msg("Request received")
+
 		w.Header().Set("Content-Type", "application/json")
-
-		log.Println("Request:", r.Method, r.URL.Path, r.URL.Query())
-
 		next.ServeHTTP(w, r)
 	})
 }
