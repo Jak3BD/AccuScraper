@@ -8,13 +8,14 @@ import (
 )
 
 func Handle(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
 	params := r.URL.Query()
 	language := params.Get("language")
 	query := params.Get("query")
 
 	baseUrl := fmt.Sprintf("https://www.accuweather.com/web-api/autocomplete?language=%s&query=%s", language, query)
 
-	req, err := utils.NewRequest(language, baseUrl)
+	req, err := utils.NewRequest(ctx, language, baseUrl)
 	if err != nil {
 		utils.SendError(w, "Error creating request", err, http.StatusInternalServerError)
 		return

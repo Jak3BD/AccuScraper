@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"context"
 	"errors"
 	"net/http"
 	"strings"
@@ -16,8 +17,8 @@ type ResolvedKey struct {
 
 var resolvedKeys = make(map[string]ResolvedKey)
 
-func NewRequest(language, url string) (*http.Request, error) {
-	req, err := http.NewRequest("GET", url, nil)
+func NewRequest(ctx context.Context, language, url string) (*http.Request, error) {
+	req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -27,12 +28,12 @@ func NewRequest(language, url string) (*http.Request, error) {
 	return req, nil
 }
 
-func ResolveKey(language, key string) (ResolvedKey, error) {
+func ResolveKey(ctx context.Context, language, key string) (ResolvedKey, error) {
 	if resolved, ok := resolvedKeys[key]; ok {
 		return resolved, nil
 	}
 
-	req, err := NewRequest(language, "https://www.accuweather.com/web-api/three-day-redirect?key="+key)
+	req, err := NewRequest(ctx, language, "https://www.accuweather.com/web-api/three-day-redirect?key="+key)
 	if err != nil {
 		return ResolvedKey{}, err
 	}
@@ -73,8 +74,8 @@ func ResolveKey(language, key string) (ResolvedKey, error) {
 	return resolved, nil
 }
 
-func RequestDocument(language, url string) (*goquery.Document, error) {
-	req, err := NewRequest(language, url)
+func RequestDocument(ctx context.Context, language, url string) (*goquery.Document, error) {
+	req, err := NewRequest(ctx, language, url)
 	if err != nil {
 		return nil, err
 	}

@@ -7,18 +7,19 @@ import (
 )
 
 func Handle(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
 	params := r.URL.Query()
 	language := params.Get("language")
 	key := params.Get("key")
 
-	resolvedKey, err := utils.ResolveKey(language, key)
+	resolvedKey, err := utils.ResolveKey(ctx, language, key)
 	if err != nil {
 		utils.SendError(w, "Error resolving key", err, http.StatusInternalServerError)
 		return
 	}
 
 	url := fmt.Sprintf("https://www.accuweather.com/%s/%s/%s/%s/weather-forecast/%s", language, resolvedKey.Country, resolvedKey.LocalizedName, resolvedKey.ZIP, key)
-	doc, err := utils.RequestDocument(language, url)
+	doc, err := utils.RequestDocument(ctx, language, url)
 	if err != nil {
 		utils.SendError(w, "Error getting document", err, http.StatusInternalServerError)
 		return
